@@ -2,9 +2,13 @@ import argparse
 import os
 from PIL import ImageColor, Image, ImageDraw, ImageFont
 import time
+from tqdm import tqdm
 
 def generate_plain_image(width, height, color):
     try:
+        # Set up tqdm progress bar
+        pbar = tqdm(total=width * height, desc='Generating plain image', unit='pixels')
+
         rgb_color = ImageColor.getrgb(color)
         image = Image.new('RGB', (width, height), rgb_color)
 
@@ -27,8 +31,15 @@ def generate_plain_image(width, height, color):
         timestamp = int(time.time())
         filename = f'plain_image_{timestamp}.jpg'  # Unique filename with timestamp
         filepath = os.path.join(output_dir, filename)  # Output file path
+
+        # Iterate over each pixel and update the tqdm progress bar
+        for i in range(width):
+            for j in range(height):
+                image.putpixel((i, j), rgb_color)
+                pbar.update(1)
+        pbar.close()
+
         image.save(filepath)  # Save the image as JPEG
-        print("Plain image generated successfully!")
         print("Image filepath:", filename)
     except ValueError as e:
         print("Invalid color name:", str(e))
